@@ -13,9 +13,10 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 from pathlib import Path
 from datetime import timedelta
 import os
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
+import django_heroku
 
-load_dotenv()
+# load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -93,16 +94,16 @@ WSGI_APPLICATION = 'BonoApe.wsgi.application'
 #     }
 # }
 
-DATABASES = {
-    'default':{
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'd12as2sc42k7o7',
-        'USER': 'cxdinwhpwpnfgv',
-        'PASSWORD': 'CT0t1868',
-        'HOST': 'ec2-35-172-246-19.compute-1.amazonaws.com',
-        'PORT': '5432',
-    }
-}
+# DATABASES = {
+#     'default':{
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'd12as2sc42k7o7',
+#         'USER': 'cxdinwhpwpnfgv',
+#         'PASSWORD': 'CT0t1868',
+#         'HOST': 'ec2-35-172-246-19.compute-1.amazonaws.com',
+#         'PORT': '5432',
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -179,3 +180,5 @@ SIMPLE_JWT = {
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+
+django_heroku.settings(locals())
