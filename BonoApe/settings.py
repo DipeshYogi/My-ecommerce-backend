@@ -96,10 +96,10 @@ WSGI_APPLICATION = 'BonoApe.wsgi.application'
 DATABASES = {
     'default':{
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'BonoApeDb',
-        'USER': 'postgres',
+        'NAME': 'd12as2sc42k7o7',
+        'USER': 'cxdinwhpwpnfgv',
         'PASSWORD': 'CT0t1868',
-        'HOST': 'localhost',
+        'HOST': 'ec2-35-172-246-19.compute-1.amazonaws.com',
         'PORT': '5432',
     }
 }
