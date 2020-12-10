@@ -9,7 +9,7 @@ def upload_to(instance, filename):
 class Category(models.Model):
     """Category model"""
     cat_name = models.CharField(max_length=50, primary_key=True)
-    img = models.ImageField(_("Image"), upload_to=upload_to, default='default/category.jpg')
+    img = models.ImageField(_("Image"), upload_to=upload_to, default='media/default/category_ngqsdm.jpg')
     desc = models.CharField(max_length=300, null=True, blank=True)
     class Meta:
         verbose_name_plural = 'Categories'
