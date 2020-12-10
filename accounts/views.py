@@ -18,10 +18,9 @@ class RegisterUserView(APIView):
         if serializer.is_valid():
             user = serializer.save()
             return Response({
-                "user":UserInfoSerializer(user).data,
-                "token":AuthToken.objects.create(user)[1]
+                "user":UserInfoSerializer(user).data
                 })
-        
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -35,7 +34,7 @@ class LoginUserView(APIView):
             user = serializer.validated_data
             return Response({
              "user": UserInfoSerializer(user).data,
-             "token": AuthToken.objects.create(user)[1] 
+             "token": AuthToken.objects.create(user)[1]
             })
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -55,7 +54,7 @@ class UpdateUserView(APIView):
         if serializer.is_valid():
             user = serializer.save()
             return Response({"userdata": UserInfoSerializer(user).data})
-        
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -75,7 +74,7 @@ class ModTokenObtainPairSerializer(TokenObtainPairSerializer):
         userdata['date_of_birth'] = self.user.date_of_birth
 
         data['userdata'] = userdata
-        
+
         return data
 
 
