@@ -28,8 +28,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = '95yc#fyba(67nat1m+c_7=u*!8_1ajj^!zq5ahb(o1^=6@72_%'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG')
-print("DEGUGGGGGGGGGGGG", os.getenv('DEBUG'))
+DEBUG = True
+
 ALLOWED_HOSTS = []
 
 
@@ -138,8 +138,11 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
-
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
 
 AUTH_USER_MODEL = 'accounts.User'
 
