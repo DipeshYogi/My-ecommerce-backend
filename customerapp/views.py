@@ -55,58 +55,41 @@ class DeleteUserAddress(APIView):
   """Delete user addresses"""
   permission_classes = [ permissions.IsAuthenticated, ]
 
-  def post(self, request, format=None):
-    serializer = AddressSerializer(data = request.data)
-    if serializer.is_valid():
-      userid = request.user.id
-      addr1 = serializer.data['address1']
-      addr2 = serializer.data['address2']
-      pincode = serializer.data['pincode']
-      phone = serializer.data['phone']
-      try:
-        address = Addresses.objects.get(
-                                          userid=userid,
-                                          address1 = addr1,
-                                          address2 = addr2,
-                                          pincode = pincode,
-                                          phone = phone )
-        conn = GetConnection()
-        con, cur = conn.obtain_connection()
-        cur.execute('delete from customerapp_addresses where userid_id = %s \
-                     and address1 = %s and address2 = %s and pincode = %s \
-                     and phone = %s', (userid, addr1, addr2, pincode, phone))
-        con.commit()
-        # con.close()
-        # cur.close()
-        conn.close_connection(con, cur)
-        return Response({'msg':'DELETED'}, status = status.HTTP_200_OK)
-        
-      except Addresses.DoesNotExist:
-        return Response(status = status.HTTP_404_NOT_FOUND)
+  def post(self, request, addrId, format=None):
+    conn = GetConnection()
+    con, cur = conn.obtain_connection()
+    cur.execute('select * from customerapp_addresses where id = %s', (addrId,))
+    if cur.rowcount == 1:
+      cur.execute('delete from customerapp_addresses where id = %s', (addrId,))
+      con.commit()
+      conn.close_connection(con, cur)
+      return Response({"msg":"Address deleted"}, status = status.HTTP_200_OK)
     else:
-      return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
+      conn.close_connection(con, cur)
+      return Response({"msg":"Address not found"}, status = status.HTTP_404_NOT_FOUND)
+
 
 class UpdateActiveAddress(APIView):
-      """Update active address of a user"""
-      permission_classes = [ permissions.IsAuthenticated, ]
-      
-      def put(self, request, addrId, format=None):
-            userid = request.user.id
-            conn = GetConnection()
-            con, cur = conn.obtain_connection()
-            cur.execute('select * from customerapp_addresses where userid_id =\
-                         %s',(userid,))
-            addresses = cur.fetchall()
-            for add in addresses:
-              if add['is_active'] == True:
-                cur.execute('update customerapp_addresses set is_active = %s \
-                             where id = %s', (False, add['id']))
-            cur.execute('update customerapp_addresses set is_active = %s where \
-                         id = %s', (True, addrId))
-            
-            con.commit()
-            conn.close_connection(con, cur)
+  """Update active address of a user"""
+  permission_classes = [ permissions.IsAuthenticated, ]
+  
+  def put(self, request, addrId, format=None):
+    userid = request.user.id
+    conn = GetConnection()
+    con, cur = conn.obtain_connection()
+    cur.execute('select * from customerapp_addresses where userid_id =\
+                  %s',(userid,))
+    addresses = cur.fetchall()
+    for add in addresses:
+      if add['is_active'] == True:
+        cur.execute('update customerapp_addresses set is_active = %s \
+                      where id = %s', (False, add['id']))
+    cur.execute('update customerapp_addresses set is_active = %s where \
+                  id = %s', (True, addrId))
+    
+    con.commit()
+    conn.close_connection(con, cur)
 
-            return Response({'msg':'Active address updated'}, status=status.HTTP_200_OK)
+    return Response({'msg':'Active address updated'}, status=status.HTTP_200_OK)
 
 
