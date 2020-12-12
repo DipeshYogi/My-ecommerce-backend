@@ -59,8 +59,6 @@ class DeleteUserAddress(APIView):
     serializer = AddressSerializer(data = request.data)
     if serializer.is_valid():
       userid = request.user.id
-      # print("#########################")
-      # print(userid.id)
       addr1 = serializer.data['address1']
       addr2 = serializer.data['address2']
       pincode = serializer.data['pincode']

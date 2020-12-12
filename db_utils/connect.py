@@ -1,3 +1,4 @@
+import os
 import psycopg2
 import psycopg2.extras
 
@@ -7,13 +8,11 @@ class GetConnection():
   """
   def obtain_connection(self):
     try:
-      conn = psycopg2.connect(
-                  user = 'postgres',
-                  password = 'CT0t1868',
-                  host = 'localhost',
-                  port = '5432',
-                  database = 'BonoApeDb'
-      )
+      if os.environ.get('DATABASE_URL'):
+        conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+      else:
+        conn = psycopg2.connect(os.environ.get('ECOM_DB'))
+
       cursor = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
       return conn, cursor
 
