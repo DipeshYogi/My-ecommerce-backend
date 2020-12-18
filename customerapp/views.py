@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
 from .models import Addresses
-from  db_utils.connect import GetConnection
+from db_utils.connect import GetConnection
 
 
 class GetUserAddress(APIView):

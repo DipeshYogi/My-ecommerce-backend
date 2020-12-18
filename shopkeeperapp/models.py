@@ -46,10 +46,10 @@ class ShopItems(models.Model):
     shopid = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     item_name = models.CharField(max_length=25)
     brand = models.CharField(max_length=20, blank=True)
-    list_price = models.DecimalField(max_digits=5, decimal_places=2, null=True)
+    list_price = models.DecimalField(max_digits=7, decimal_places=2, null=True)
     uom = models.CharField(max_length=25, verbose_name='Unit of Measure', \
                            null=True)
-    discount = models.DecimalField(max_digits=5, decimal_places=2, null=True)
+    discount = models.DecimalField(max_digits=7, decimal_places=2, null=True)
     img = models.ImageField(null=True, blank=True)
 
     class Meta:

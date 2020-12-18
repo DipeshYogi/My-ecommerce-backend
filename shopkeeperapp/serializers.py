@@ -21,6 +21,7 @@ class ShopProfileUpdateSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         """Update the existing Shop profile"""
+        instance.shop_name = validated_data.get('shop_name', instance.shop_name)
         instance.category = validated_data.get('category', instance.category)
         instance.latitude = validated_data.get('latitude', instance.latitude)
         instance.longtude = validated_data.get('longitude', instance.longitude)
