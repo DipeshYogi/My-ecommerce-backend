@@ -22,10 +22,11 @@ class CreateOrder(APIView):
 
       # fetch new order number
       cur.execute("""select max("HORD") from orderapp_ech""")
-      if cur.rowcount == 0:
-        new_ord = 1
-      else:
+      try:
         new_ord = cur.fetchone()['max'] + 1
+      except:
+        new_ord = 1
+
 
       # fetch shop name
       cur.execute("""select "shop_name" from shopkeeperapp_shopprofile where shopid_id \
