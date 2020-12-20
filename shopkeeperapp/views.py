@@ -132,6 +132,22 @@ class AddCategory(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class EditCategory(APIView):
+    """Edit categories"""
+    parser_classes = [MultiPartParser, FormParser]
+    def put(self, request, cat, format=None):
+      try:
+        instance = Category.objects.get(cat_name=cat)
+      except Category.DoesNotExist:
+        return Response(state=status.HTTP_404_NOT_FOUND)
+
+      serializer = CategorySerializer(instance, data = request.data, partial=True)
+      if serializer.is_valid():
+          serializer.save()
+          return Response(serializer.data, status=status.HTTP_201_CREATED)
+      
+      return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class GetCategoryInfo(APIView):
     """Retreive category information"""

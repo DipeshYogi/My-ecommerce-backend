@@ -74,6 +74,14 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = '__all__'
+    
+    def update(self, instance, validated_data):
+      """update an existing categories"""
+      instance.cat_name = validated_data.get('cat_name', instance.cat_name)
+      instance.img = validated_data.get('img', instance.img)
+      instance.desc = validated_data.get('desc', instance.desc)
+      instance.save()
+      return instance
 
 
 class GetCategorySerializer(serializers.ModelSerializer):
