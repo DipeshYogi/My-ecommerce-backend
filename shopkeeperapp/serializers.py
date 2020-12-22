@@ -96,8 +96,24 @@ class GetCategorySerializer(serializers.ModelSerializer):
         img_url = cat.img.url
         return request.build_absolute_uri(img_url)
 
+
 class GetShopByCatSerializer(serializers.Serializer):
     cat_name = serializers.CharField(max_length=25)
+
+
+class GetTopDealsSerializer(serializers.Serializer):
+    shop_id = serializers.IntegerField()
+    shop_name = serializers.CharField(max_length=25)
+    item_name = serializers.CharField(max_length=25)
+    list_price = serializers.DecimalField(max_digits=7, decimal_places=2)
+    discount = serializers.DecimalField(max_digits=7, decimal_places=2)
+    img = serializers.SerializerMethodField()
+
+    def get_img(self, cat):
+      request = self.context.get('request')
+      img = cat.img.url
+      return request.build_absolute_uri(img)
+
 
 
 

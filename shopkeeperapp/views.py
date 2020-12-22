@@ -4,7 +4,8 @@ from .models import ShopProfile, ShopItems, Category
 from .serializers import ShopProfileSerializer, ShopProfileUpdateSerializer, \
                          ShopItemSerializer, ShopItemDetailsSerializer, \
                          ShopItemUpdateSerializer, CategorySerializer, \
-                         GetShopByCatSerializer, GetCategorySerializer
+                         GetShopByCatSerializer, GetCategorySerializer, \
+                         GetTopDealsSerializer
 from rest_framework.response import Response
 from rest_framework import status, permissions
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -172,3 +173,34 @@ class GetShopsByCategory(APIView):
             return Response(shop_ser.data)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class GetTopDeals(APIView):
+  """Get all top deals from the shops"""
+  def get(self, request, format=None):
+    conn = GetConnection()
+    con, cur = conn.obtain_connection()
+
+    cur.execute(""" select "shop_name", "shopid_id", "category_id" from shopkeeperapp_shopprofile """)
+    deals = []
+    for i in cur:
+      shop_deals = {}
+      con1, cur1 = conn.obtain_connection()
+      cur1.execute(""" select "item_name", "list_price", "discount" from shopkeeperapp_shopitems \
+                   where shopid_id=%s and discount!=%s order by discount desc """, (i['shopid_id'],\
+                   0))
+      if cur1.rowcount > 0:
+        shop_deals['shop_id'] = i['shopid_id']
+        shop_deals['shop_name'] = i['shop_name']
+        itm = cur1.fetchone()
+        shop_deals['item_name'] = itm['item_name']       
+        shop_deals['list_price'] = itm['list_price']
+        shop_deals['discount'] = itm['discount']
+        image = Category.objects.get(cat_name = i['category_id'])
+        shop_deals['img'] = image.img.url
+        
+        deals.append(shop_deals)
+
+      deals_data = GetTopDealsSerializer(deals, many=True)
+        
+    return Response(deals, status = status.HTTP_200_OK)
