@@ -4,8 +4,7 @@ from .models import ShopProfile, ShopItems, Category
 from .serializers import ShopProfileSerializer, ShopProfileUpdateSerializer, \
                          ShopItemSerializer, ShopItemDetailsSerializer, \
                          ShopItemUpdateSerializer, CategorySerializer, \
-                         GetShopByCatSerializer, GetCategorySerializer, \
-                         GetTopDealsSerializer
+                         GetShopByCatSerializer, GetCategorySerializer
 from rest_framework.response import Response
 from rest_framework import status, permissions
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -200,7 +199,5 @@ class GetTopDeals(APIView):
         shop_deals['img'] = image.img.url
         
         deals.append(shop_deals)
-
-      deals_data = GetTopDealsSerializer(deals, many=True)
         
     return Response(deals, status = status.HTTP_200_OK)
