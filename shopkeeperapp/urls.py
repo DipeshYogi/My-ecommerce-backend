@@ -12,5 +12,6 @@ urlpatterns = [
     path('categories/', views.GetCategoryInfo.as_view()),
     path('categories/add/', views.AddCategory.as_view()),
     path('categories/edit/<str:cat>/', views.EditCategory.as_view()),
-    path('categories/shops/', views.GetShopsByCategory.as_view())
+    path('categories/shops/', views.GetShopsByCategory.as_view()),
+    path('top-deals/', views.GetTopDeals.as_view())
 ]

@@ -96,8 +96,11 @@ class GetCategorySerializer(serializers.ModelSerializer):
         img_url = cat.img.url
         return request.build_absolute_uri(img_url)
 
+
 class GetShopByCatSerializer(serializers.Serializer):
     cat_name = serializers.CharField(max_length=25)
+
+
 
 
 
