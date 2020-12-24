@@ -22,5 +22,5 @@ class GetConnection():
   def close_connection(self, conn, cursor):
         conn.close()
         cursor.close()
-        print("Connection Closed")
+       
 
