@@ -199,5 +199,32 @@ class GetTopDeals(APIView):
         shop_deals['img'] = image.img.url
         
         deals.append(shop_deals)
-        
+
+    conn.close_connection(con, cur)
+    conn.close_connection(con1, cur1)
+     
     return Response(deals, status = status.HTTP_200_OK)
+
+
+class GetTopShops(APIView):
+  """Get top registered shops"""
+  def get(self, request, format=None):
+    conn = GetConnection()
+    con, cur = conn.obtain_connection()
+    cur.execute(""" select "shopid_id", "shop_name", "category_id", "ratings" from \
+                shopkeeperapp_shopprofile order by ratings desc limit 6 """)
+
+    shops = []
+    for i in cur:
+      data = {}
+      data['shop_id'] = i['shopid_id']
+      data['shop_name'] = i['shop_name']
+      data['ratings'] = i['ratings']
+      image = Category.objects.get(cat_name = i['category_id'])
+      data['img'] = image.img.url
+      shops.append(data)
+    
+    conn.close_connection(con, cur)
+
+    return Response(shops, status = status.HTTP_200_OK)
+
