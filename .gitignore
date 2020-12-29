@@ -144,3 +144,6 @@ dmypy.json
 
 # profiling data
 .prof
+
+# static files
+staticfiles/

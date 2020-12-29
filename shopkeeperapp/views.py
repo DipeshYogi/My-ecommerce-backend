@@ -8,7 +8,8 @@ from .serializers import ShopProfileSerializer, ShopProfileUpdateSerializer, \
 from rest_framework.response import Response
 from rest_framework import status, permissions
 from rest_framework.parsers import MultiPartParser, FormParser
-from db_utils.connect import GetConnection
+from db_utils.connect import dictfetchall, dictfetchone
+from django.db import connection
 
 
 class ShopProfileList(APIView):
@@ -66,6 +67,7 @@ class GetItemsByShop(APIView):
             except:
                 return Response({"status":status.HTTP_404_NOT_FOUND})
 
+
 class GetItemsByShopId(APIView):
     """Fetch Shop items by shop id"""
     def get(self, request, shopid, format=None):
@@ -109,17 +111,13 @@ class UpdateItemByShop(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def delete(self, request, id):
-        conn = GetConnection()
-        con, cur = conn.obtain_connection()
-        cur.execute("select * from shopkeeperapp_shopitems where id = %s", (id,))
-        if cur.rowcount == 1:
-          cur.execute("delete from shopkeeperapp_shopitems where id = %s", (id,))
-          con.commit()
-          conn.close_connection(con, cur)
-          return Response({"msg":"Deleted"}, status = status.HTTP_200_OK)
-        else:
-          conn.close_connection(con, cur)
-          return Response({"msg":"Item not found"}, status = status.HTTP_404_NOT_FOUND)
+        with connection.cursor() as cur:
+          cur.execute("select * from shopkeeperapp_shopitems where id = %s", [id])  
+          if cur.rowcount == 1:
+            cur.execute("delete from shopkeeperapp_shopitems where id = %s", [id])
+            return Response({"msg":"Deleted"}, status = status.HTTP_200_OK)
+          else:
+            return Response({"msg":"Item not found"}, status = status.HTTP_404_NOT_FOUND)
 
 
 class AddCategory(APIView):
@@ -132,6 +130,7 @@ class AddCategory(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class EditCategory(APIView):
     """Edit categories"""
@@ -148,7 +147,8 @@ class EditCategory(APIView):
           return Response(serializer.data, status=status.HTTP_201_CREATED)
       
       return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
+
 class GetCategoryInfo(APIView):
     """Retreive category information"""
 
@@ -177,54 +177,49 @@ class GetShopsByCategory(APIView):
 class GetTopDeals(APIView):
   """Get all top deals from the shops"""
   def get(self, request, format=None):
-    conn = GetConnection()
-    con, cur = conn.obtain_connection()
+    with connection.cursor() as cur:
+      cur.execute(""" select "shop_name", "shopid_id", "category_id" from shopkeeperapp_shopprofile """)
+      shops = dictfetchall(cur)
+      deals = []
+      for i in shops:
+        shop_deals = {}
+        with connection.cursor() as cur1:
+          cur1.execute(""" select "item_name", "list_price", "discount" from shopkeeperapp_shopitems \
+                      where shopid_id=%s and discount!=%s order by discount desc """, [i['shopid_id'],\
+                      0])
+          if cur1.rowcount > 0:
+            shop_deals['shop_id'] = i['shopid_id']
+            shop_deals['shop_name'] = i['shop_name']
+            itm = dictfetchone(cur1)
+            shop_deals['item_name'] = itm['item_name']       
+            shop_deals['list_price'] = itm['list_price']
+            shop_deals['discount'] = itm['discount']
+            image = Category.objects.get(cat_name = i['category_id'])
+            shop_deals['img'] = image.img.url
+            
+            deals.append(shop_deals)
 
-    cur.execute(""" select "shop_name", "shopid_id", "category_id" from shopkeeperapp_shopprofile """)
-    deals = []
-    for i in cur:
-      shop_deals = {}
-      con1, cur1 = conn.obtain_connection()
-      cur1.execute(""" select "item_name", "list_price", "discount" from shopkeeperapp_shopitems \
-                   where shopid_id=%s and discount!=%s order by discount desc """, (i['shopid_id'],\
-                   0))
-      if cur1.rowcount > 0:
-        shop_deals['shop_id'] = i['shopid_id']
-        shop_deals['shop_name'] = i['shop_name']
-        itm = cur1.fetchone()
-        shop_deals['item_name'] = itm['item_name']       
-        shop_deals['list_price'] = itm['list_price']
-        shop_deals['discount'] = itm['discount']
-        image = Category.objects.get(cat_name = i['category_id'])
-        shop_deals['img'] = image.img.url
-        
-        deals.append(shop_deals)
-
-    conn.close_connection(con, cur)
-    conn.close_connection(con1, cur1)
-     
     return Response(deals, status = status.HTTP_200_OK)
 
 
 class GetTopShops(APIView):
   """Get top registered shops"""
   def get(self, request, format=None):
-    conn = GetConnection()
-    con, cur = conn.obtain_connection()
-    cur.execute(""" select "shopid_id", "shop_name", "category_id", "ratings" from \
+    with connection.cursor() as cur:
+      cur.execute(""" select "shopid_id", "shop_name", "category_id", "ratings" from \
                 shopkeeperapp_shopprofile order by ratings desc limit 6 """)
-
-    shops = []
-    for i in cur:
-      data = {}
-      data['shop_id'] = i['shopid_id']
-      data['shop_name'] = i['shop_name']
-      data['ratings'] = i['ratings']
-      image = Category.objects.get(cat_name = i['category_id'])
-      data['img'] = image.img.url
-      shops.append(data)
+      shop_data = dictfetchall(cur)
+      shops = []
+      for i in shop_data:
+        data = {}
+        data['shop_id'] = i['shopid_id']
+        data['shop_name'] = i['shop_name']
+        data['ratings'] = i['ratings']
+        image = Category.objects.get(cat_name = i['category_id'])
+        data['img'] = image.img.url
+        shops.append(data)
     
-    conn.close_connection(con, cur)
-
     return Response(shops, status = status.HTTP_200_OK)
+
+    
 

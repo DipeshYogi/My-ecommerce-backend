@@ -4,7 +4,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
 from .models import Addresses
-from db_utils.connect import GetConnection
+from db_utils.connect import dictfetchone, dictfetchall
+from django.db import connection
 
 
 class GetUserAddress(APIView):
@@ -56,17 +57,13 @@ class DeleteUserAddress(APIView):
   permission_classes = [ permissions.IsAuthenticated, ]
 
   def post(self, request, addrId, format=None):
-    conn = GetConnection()
-    con, cur = conn.obtain_connection()
-    cur.execute('select * from customerapp_addresses where id = %s', (addrId,))
-    if cur.rowcount == 1:
-      cur.execute('delete from customerapp_addresses where id = %s', (addrId,))
-      con.commit()
-      conn.close_connection(con, cur)
-      return Response({"msg":"Address deleted"}, status = status.HTTP_200_OK)
-    else:
-      conn.close_connection(con, cur)
-      return Response({"msg":"Address not found"}, status = status.HTTP_404_NOT_FOUND)
+    with connection.cursor() as cur:
+      cur.execute('select * from customerapp_addresses where id = %s', [addrId])
+      if cur.rowcount == 1:
+        cur.execute('delete from customerapp_addresses where id = %s', [addrId])
+        return Response({"msg":"Address deleted"}, status = status.HTTP_200_OK)
+      else:
+        return Response({"msg":"Address not found"}, status = status.HTTP_404_NOT_FOUND)
 
 
 class UpdateActiveAddress(APIView):
@@ -74,21 +71,16 @@ class UpdateActiveAddress(APIView):
   permission_classes = [ permissions.IsAuthenticated, ]
   
   def put(self, request, addrId, format=None):
-    userid = request.user.id
-    conn = GetConnection()
-    con, cur = conn.obtain_connection()
-    cur.execute('select * from customerapp_addresses where userid_id =\
-                  %s',(userid,))
-    addresses = cur.fetchall()
-    for add in addresses:
-      if add['is_active'] == True:
-        cur.execute('update customerapp_addresses set is_active = %s \
-                      where id = %s', (False, add['id']))
-    cur.execute('update customerapp_addresses set is_active = %s where \
-                  id = %s', (True, addrId))
-    
-    con.commit()
-    conn.close_connection(con, cur)
+    with connection.cursor() as cur:
+      cur.execute('select * from customerapp_addresses where userid_id =\
+                  %s',[request.user.id])
+      addresses = dictfetchall(cur)
+      for add in addresses:
+        if add['is_active'] == True:
+          cur.execute('update customerapp_addresses set is_active = %s \
+                where id = %s', [False, add['id']])
+      cur.execute('update customerapp_addresses set is_active = %s where \
+              id = %s', [True, addrId])
 
     return Response({'msg':'Active address updated'}, status=status.HTTP_200_OK)
 
