@@ -14,13 +14,13 @@ class GetUserAddress(APIView):
 
   def get(self, request, id, format=None):
     """get user addresses"""
-    try:
-        addresses = Addresses.objects.filter(userid = id)
-        serializer = AddressSerializer(addresses, many = True)
-        return Response(serializer.data)
-    except:
-        return Response(status = status.HTTP_404_NOT_FOUND)
-            
+    addresses = Addresses.objects.filter(userid = id)
+    if addresses:
+      serializer = AddressSerializer(addresses, many = True)
+      return Response(serializer.data)  
+    else:
+      return Response(status = status.HTTP_404_NOT_FOUND)
+
 
 class AddUserAddress(APIView):
   """Add user addresses"""
@@ -38,6 +38,8 @@ class AddUserAddress(APIView):
 
 class EditUserAddress(APIView):
   """Edit user address""" 
+  permission_classes = [ permissions.IsAuthenticated, ]
+
   def put(self, request, id, format=None):
     try:
       instance = Addresses.objects.get(pk=id)
